@@ -1,98 +1,308 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+Revisão Prova NestJS
+1. Comandos de configuração do NestJS
+Instalar Nest CLI
+npm i -g @nestjs/cli
+Criar projeto Nest
+nest new nome-do-projeto
+Exemplo:
+nest new revisao-prova
+Rodar o projeto
+npm run start
+Modo desenvolvimento:
+npm run start:dev
+Criar módulos, controllers e services
+nest g module user
+nest g controller user
+nest g service user
+Ou criar tudo junto:
+nest g resource user
+Esse comando cria:
+user/
+├── dto/
+├── entities/
+├── user.controller.ts
+├── user.module.ts
+└── user.service.ts
+2. Instalação de dependências
+Sequelize + MySQL
+Usado para conectar o NestJS ao banco MySQL, que você gerencia pelo Workbench.
+npm install @nestjs/sequelize sequelize sequelize-typescript mysql2
+Configuração com variáveis de ambiente
+npm install @nestjs/config
+Arquivo .env:
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_DATABASE=revisao
+Class Validator e Class Transformer
+Usado para validar DTOs.
+npm install class-validator class-transformer
+No main.ts:
+import { ValidationPipe } from '@nestjs/common';
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+app.useGlobalPipes(new ValidationPipe());
+Exemplo DTO:
+import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+export class CreateUserDto {
+ @IsString()
+ @IsNotEmpty()
+ nome: string;
 
-## Description
+ @IsNumber()
+ idade: number;
+}
+JWT
+Usado para autenticação.
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt
+npm install -D @types/passport-jwt
+Também costuma usar:
+npm install bcrypt
+npm install -D @types/bcrypt
+Microservices
+npm install @nestjs/microservices
+Para comunicação TCP simples:
+import { Transport } from '@nestjs/microservices';
+Swagger
+Usado para documentar e testar a API pelo navegador.
+npm install @nestjs/swagger swagger-ui-express
+No main.ts:
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+const config = new DocumentBuilder()
+ .setTitle('API Revisão')
+ .setDescription('Documentação da API')
+ .setVersion('1.0')
+ .build();
 
-## Project setup
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('api', app, document);
+Acessa em:
+http://localhost:3000/api
+3. Passo a passo de criação de arquivos
+Exemplo: entidade User.
+1. Criar módulo, controller e service
+nest g module user
+nest g controller user
+nest g service user
+2. Criar model Sequelize
+Arquivo:
+src/user/user.model.ts
+Código:
+import { Column, Model, Table, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
 
-```bash
-$ npm install
-```
+@Table({
+ tableName: 'user',
+ timestamps: false,
+})
+export class User extends Model {
+ @PrimaryKey
+ @AutoIncrement
+ @Column
+ id: number;
 
-## Compile and run the project
+ @Column
+ nome: string;
 
-```bash
-# development
-$ npm run start
+ @Column
+ email: string;
+}
+3. Configurar o módulo
+import { Module } from '@nestjs/common';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { User } from './user.model';
+import { UserService } from './user.service';
+import { UserController } from './user.controller';
 
-# watch mode
-$ npm run start:dev
+@Module({
+ imports: [SequelizeModule.forFeature([User])],
+ controllers: [UserController],
+ providers: [UserService],
+})
+export class UserModule {}
+4. Criar DTO
+Arquivo:
+src/user/dto/create-user.dto.ts
+Código:
+import { IsString, IsNotEmpty } from 'class-validator';
 
-# production mode
-$ npm run start:prod
-```
+export class CreateUserDto {
+ @IsString()
+ @IsNotEmpty()
+ nome: string;
 
-## Run tests
+ @IsString()
+ @IsNotEmpty()
+ email: string;
+}
+5. Criar service
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { User } from './user.model';
+import { CreateUserDto } from './dto/create-user.dto';
 
-```bash
-# unit tests
-$ npm run test
+@Injectable()
+export class UserService {
+ constructor(
+   @InjectModel(User)
+   private userModel: typeof User,
+ ) {}
 
-# e2e tests
-$ npm run test:e2e
+ findAll() {
+   return this.userModel.findAll();
+ }
 
-# test coverage
-$ npm run test:cov
-```
+ create(data: CreateUserDto) {
+   return this.userModel.create(data as any);
+ }
+}
+6. Criar controller
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
-## Deployment
+@Controller('user')
+export class UserController {
+ constructor(private readonly userService: UserService) {}
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+ @Get()
+ findAll() {
+   return this.userService.findAll();
+ }
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+ @Post()
+ create(@Body() data: CreateUserDto) {
+   return this.userService.create(data);
+ }
+}
+7. Importar no AppModule
+import { Module } from '@nestjs/common';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { User } from './user/user.model';
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+@Module({
+ imports: [
+   ConfigModule.forRoot(),
+   SequelizeModule.forRoot({
+     dialect: 'mysql',
+     host: process.env.DB_HOST,
+     port: Number(process.env.DB_PORT),
+     username: process.env.DB_USER,
+     password: process.env.DB_PASSWORD,
+     database: process.env.DB_DATABASE,
+     models: [User],
+     autoLoadModels: true,
+     synchronize: true,
+   }),
+   UserModule,
+ ],
+})
+export class AppModule {}
+4. Para que serve API, Microsserviços e Swagger
+API
+API é uma forma de comunicação entre sistemas.
+Exemplo:
+O frontend em React ou Angular precisa cadastrar um usuário. Ele envia uma requisição para o backend:
+POST /user
+Com dados:
+{
+ "nome": "Gabriel",
+ "email": "gabriel@email.com"
+}
+O backend recebe, processa, salva no banco e devolve uma resposta.
+Principais métodos:
+GET     buscar dados
+POST    cadastrar dados
+PUT     atualizar tudo
+PATCH   atualizar parcialmente
+DELETE  deletar dados
+Exemplo de API REST:
+GET /user
+POST /user
+GET /user/1
+PATCH /user/1
+DELETE /user/1
+Microsserviços
+Microsserviços são uma forma de dividir um sistema grande em partes menores e independentes.
+Exemplo:
+Serviço de Usuários
+Serviço de Pagamentos
+Serviço de Produtos
+Serviço de Notificações
+Cada serviço pode ter sua própria responsabilidade.
+Vantagem:
+Organização
+Escalabilidade
+Manutenção mais fácil
+Independência entre partes do sistema
+Exemplo prático:
+Em vez de um único sistema fazer tudo, você pode ter:
+auth-service       login e JWT
+user-service       cadastro de usuários
+email-service      envio de e-mails
+product-service    produtos
+No NestJS, microsserviços podem se comunicar por:
+TCP
+RabbitMQ
+Kafka
+Redis
+gRPC
+Swagger
+Swagger serve para documentar e testar a API.
+Ele mostra as rotas disponíveis, os métodos, os parâmetros e os exemplos de requisição.
+Exemplo:
+GET /user
+POST /user
+PATCH /user/{id}
+DELETE /user/{id}
+Com Swagger, você consegue testar a API direto pelo navegador, sem precisar obrigatoriamente usar Postman ou Thunder Client.
+Resumo para prova
+NestJS = framework backend para Node.js com TypeScript.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Module = organiza uma parte do sistema.
 
-## Resources
+Controller = recebe as requisições HTTP.
 
-Check out a few resources that may come in handy when working with NestJS:
+Service = contém a regra de negócio.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+DTO = define e valida os dados recebidos.
 
-## Support
+Entity/Model = representa a tabela do banco.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Sequelize = ORM usado para conversar com o banco.
 
-## Stay in touch
+MySQL = banco de dados relacional.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+JWT = autenticação por token.
 
-## License
+Swagger = documentação e teste da API.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Microsserviços = divisão do sistema em serviços menores.
+Fluxo mental do NestJS
+Requisição chega na API
+       ↓
+Controller recebe
+       ↓
+DTO valida os dados
+       ↓
+Service processa a regra
+       ↓
+Model/Sequelize acessa o banco
+       ↓
+Resposta volta para o usuário
+Exemplo:
+POST /user
+       ↓
+UserController
+       ↓
+CreateUserDto
+       ↓
+UserService
+       ↓
+UserModel
+       ↓
+MySQL
+
