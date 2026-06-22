@@ -1,308 +1,565 @@
-Revisão Prova NestJS
-1. Comandos de configuração do NestJS
-Instalar Nest CLI
+# Revisão Completa - Programação Avançada com NestJS
+
+## 1. Comandos de Configuração do NestJS
+
+### Instalar o Nest CLI
+
+```bash
 npm i -g @nestjs/cli
-Criar projeto Nest
+```
+
+### Criar um novo projeto
+
+```bash
 nest new nome-do-projeto
+```
+
 Exemplo:
+
+```bash
 nest new revisao-prova
-Rodar o projeto
+```
+
+### Executar o projeto
+
+Modo normal:
+
+```bash
 npm run start
+```
+
 Modo desenvolvimento:
+
+```bash
 npm run start:dev
-Criar módulos, controllers e services
+```
+
+### Gerar componentes do NestJS
+
+Criar módulo:
+
+```bash
 nest g module user
+```
+
+Criar controller:
+
+```bash
 nest g controller user
+```
+
+Criar service:
+
+```bash
 nest g service user
-Ou criar tudo junto:
+```
+
+Criar recurso completo:
+
+```bash
 nest g resource user
-Esse comando cria:
+```
+
+Estrutura criada:
+
+```txt
 user/
 ├── dto/
 ├── entities/
 ├── user.controller.ts
 ├── user.module.ts
 └── user.service.ts
-2. Instalação de dependências
-Sequelize + MySQL
-Usado para conectar o NestJS ao banco MySQL, que você gerencia pelo Workbench.
+```
+
+---
+
+# 2. Instalação de Dependências
+
+## Sequelize + MySQL
+
+Utilizado para comunicação com o banco de dados MySQL.
+
+```bash
 npm install @nestjs/sequelize sequelize sequelize-typescript mysql2
-Configuração com variáveis de ambiente
+```
+
+---
+
+## Configuração por Variáveis de Ambiente
+
+```bash
 npm install @nestjs/config
-Arquivo .env:
+```
+
+Arquivo `.env`
+
+```env
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=
 DB_DATABASE=revisao
-Class Validator e Class Transformer
-Usado para validar DTOs.
+```
+
+---
+
+## DTO e Validações
+
+Bibliotecas utilizadas para validação de dados.
+
+```bash
 npm install class-validator class-transformer
-No main.ts:
-import { ValidationPipe } from '@nestjs/common';
+```
 
+Configuração global:
+
+```ts
 app.useGlobalPipes(new ValidationPipe());
+```
+
 Exemplo DTO:
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CreateUserDto {
- @IsString()
- @IsNotEmpty()
- nome: string;
-
- @IsNumber()
- idade: number;
-}
-JWT
-Usado para autenticação.
-npm install @nestjs/jwt @nestjs/passport passport passport-jwt
-npm install -D @types/passport-jwt
-Também costuma usar:
-npm install bcrypt
-npm install -D @types/bcrypt
-Microservices
-npm install @nestjs/microservices
-Para comunicação TCP simples:
-import { Transport } from '@nestjs/microservices';
-Swagger
-Usado para documentar e testar a API pelo navegador.
-npm install @nestjs/swagger swagger-ui-express
-No main.ts:
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-
-const config = new DocumentBuilder()
- .setTitle('API Revisão')
- .setDescription('Documentação da API')
- .setVersion('1.0')
- .build();
-
-const document = SwaggerModule.createDocument(app, config);
-SwaggerModule.setup('api', app, document);
-Acessa em:
-http://localhost:3000/api
-3. Passo a passo de criação de arquivos
-Exemplo: entidade User.
-1. Criar módulo, controller e service
-nest g module user
-nest g controller user
-nest g service user
-2. Criar model Sequelize
-Arquivo:
-src/user/user.model.ts
-Código:
-import { Column, Model, Table, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-
-@Table({
- tableName: 'user',
- timestamps: false,
-})
-export class User extends Model {
- @PrimaryKey
- @AutoIncrement
- @Column
- id: number;
-
- @Column
- nome: string;
-
- @Column
- email: string;
-}
-3. Configurar o módulo
-import { Module } from '@nestjs/common';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { User } from './user.model';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
-
-@Module({
- imports: [SequelizeModule.forFeature([User])],
- controllers: [UserController],
- providers: [UserService],
-})
-export class UserModule {}
-4. Criar DTO
-Arquivo:
-src/user/dto/create-user.dto.ts
-Código:
+```ts
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateUserDto {
- @IsString()
- @IsNotEmpty()
- nome: string;
-
- @IsString()
- @IsNotEmpty()
- email: string;
+  @IsString()
+  @IsNotEmpty()
+  nome: string;
 }
-5. Criar service
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from './user.model';
-import { CreateUserDto } from './dto/create-user.dto';
+```
 
+---
+
+## JWT (Autenticação)
+
+```bash
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt
+npm install -D @types/passport-jwt
+```
+
+Opcional para criptografia:
+
+```bash
+npm install bcrypt
+npm install -D @types/bcrypt
+```
+
+---
+
+## Microsserviços
+
+```bash
+npm install @nestjs/microservices
+```
+
+Protocolos suportados:
+
+* TCP
+* RabbitMQ
+* Kafka
+* Redis
+* gRPC
+
+---
+
+## Swagger
+
+```bash
+npm install @nestjs/swagger swagger-ui-express
+```
+
+Configuração:
+
+```ts
+const config = new DocumentBuilder()
+  .setTitle('Minha API')
+  .setDescription('Documentação')
+  .setVersion('1.0')
+  .build();
+
+const document = SwaggerModule.createDocument(app, config);
+
+SwaggerModule.setup('api', app, document);
+```
+
+Acesso:
+
+```txt
+http://localhost:3000/api
+```
+
+---
+
+# 3. Passo a Passo para Criar uma API
+
+## Passo 1 - Criar o Projeto
+
+```bash
+nest new projeto
+```
+
+---
+
+## Passo 2 - Criar o Recurso
+
+```bash
+nest g resource user
+```
+
+---
+
+## Passo 3 - Criar Model
+
+```ts
+@Table({
+  tableName: 'user',
+  timestamps: false,
+})
+export class User extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
+
+  @Column
+  nome: string;
+
+  @Column
+  email: string;
+}
+```
+
+---
+
+## Passo 4 - Criar DTO
+
+```ts
+export class CreateUserDto {
+  nome: string;
+  email: string;
+}
+```
+
+---
+
+## Passo 5 - Criar Service
+
+Responsável pelas regras de negócio.
+
+```ts
 @Injectable()
 export class UserService {
- constructor(
-   @InjectModel(User)
-   private userModel: typeof User,
- ) {}
+  findAll() {
+    return [];
+  }
 
- findAll() {
-   return this.userModel.findAll();
- }
-
- create(data: CreateUserDto) {
-   return this.userModel.create(data as any);
- }
+  create(data) {
+    return data;
+  }
 }
-6. Criar controller
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+```
 
+---
+
+## Passo 6 - Criar Controller
+
+Responsável por receber as requisições.
+
+```ts
 @Controller('user')
 export class UserController {
- constructor(private readonly userService: UserService) {}
 
- @Get()
- findAll() {
-   return this.userService.findAll();
- }
+  @Get()
+  findAll() {}
 
- @Post()
- create(@Body() data: CreateUserDto) {
-   return this.userService.create(data);
- }
+  @Post()
+  create(@Body() data) {}
 }
-7. Importar no AppModule
-import { Module } from '@nestjs/common';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { User } from './user/user.model';
+```
 
-@Module({
- imports: [
-   ConfigModule.forRoot(),
-   SequelizeModule.forRoot({
-     dialect: 'mysql',
-     host: process.env.DB_HOST,
-     port: Number(process.env.DB_PORT),
-     username: process.env.DB_USER,
-     password: process.env.DB_PASSWORD,
-     database: process.env.DB_DATABASE,
-     models: [User],
-     autoLoadModels: true,
-     synchronize: true,
-   }),
-   UserModule,
- ],
+---
+
+## Passo 7 - Configurar Banco de Dados
+
+```ts
+SequelizeModule.forRoot({
+  dialect: 'mysql',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  autoLoadModels: true,
+  synchronize: true,
 })
-export class AppModule {}
-4. Para que serve API, Microsserviços e Swagger
-API
-API é uma forma de comunicação entre sistemas.
+```
+
+---
+
+# 4. Conceitos Fundamentais
+
+## O que é uma API?
+
+API (Application Programming Interface) é um mecanismo que permite a comunicação entre sistemas.
+
 Exemplo:
-O frontend em React ou Angular precisa cadastrar um usuário. Ele envia uma requisição para o backend:
+
+Um sistema React envia:
+
+```http
 POST /user
-Com dados:
+```
+
+Dados enviados:
+
+```json
 {
- "nome": "Gabriel",
- "email": "gabriel@email.com"
+  "nome": "Gabriel",
+  "email": "gabriel@email.com"
 }
-O backend recebe, processa, salva no banco e devolve uma resposta.
-Principais métodos:
-GET     buscar dados
-POST    cadastrar dados
-PUT     atualizar tudo
-PATCH   atualizar parcialmente
-DELETE  deletar dados
-Exemplo de API REST:
+```
+
+O NestJS recebe, processa e salva no banco.
+
+---
+
+## Métodos HTTP
+
+### GET
+
+Buscar dados.
+
+```http
 GET /user
+```
+
+---
+
+### POST
+
+Cadastrar dados.
+
+```http
 POST /user
-GET /user/1
+```
+
+---
+
+### PUT
+
+Atualizar completamente.
+
+```http
+PUT /user/1
+```
+
+---
+
+### PATCH
+
+Atualizar parcialmente.
+
+```http
 PATCH /user/1
+```
+
+---
+
+### DELETE
+
+Remover registros.
+
+```http
 DELETE /user/1
-Microsserviços
-Microsserviços são uma forma de dividir um sistema grande em partes menores e independentes.
+```
+
+---
+
+# O que são Microsserviços?
+
+Microsserviços consistem em dividir um sistema grande em vários sistemas menores.
+
 Exemplo:
-Serviço de Usuários
-Serviço de Pagamentos
-Serviço de Produtos
-Serviço de Notificações
-Cada serviço pode ter sua própria responsabilidade.
-Vantagem:
-Organização
-Escalabilidade
-Manutenção mais fácil
-Independência entre partes do sistema
-Exemplo prático:
-Em vez de um único sistema fazer tudo, você pode ter:
-auth-service       login e JWT
-user-service       cadastro de usuários
-email-service      envio de e-mails
-product-service    produtos
-No NestJS, microsserviços podem se comunicar por:
-TCP
-RabbitMQ
-Kafka
-Redis
-gRPC
-Swagger
-Swagger serve para documentar e testar a API.
-Ele mostra as rotas disponíveis, os métodos, os parâmetros e os exemplos de requisição.
+
+```txt
+Sistema Principal
+
+├── Auth Service
+├── User Service
+├── Product Service
+├── Email Service
+└── Payment Service
+```
+
+Cada serviço possui responsabilidade própria.
+
+---
+
+## Vantagens dos Microsserviços
+
+### Escalabilidade
+
+Cada serviço pode crescer independentemente.
+
+### Organização
+
+Código mais limpo e separado.
+
+### Manutenção
+
+Problemas ficam isolados.
+
+### Reutilização
+
+Serviços podem ser utilizados por vários sistemas.
+
+---
+
+# O que é Swagger?
+
+Swagger é uma ferramenta para documentação de APIs.
+
+Permite:
+
+* Visualizar endpoints.
+* Testar requisições.
+* Ver parâmetros.
+* Ver respostas.
+* Compartilhar documentação.
+
 Exemplo:
+
+```txt
+GET     /user
+POST    /user
+PATCH   /user/{id}
+DELETE  /user/{id}
+```
+
+Tudo acessível pelo navegador.
+
+---
+
+# Arquitetura do NestJS
+
+```txt
+Cliente
+   ↓
+Controller
+   ↓
+DTO
+   ↓
+Service
+   ↓
+Model
+   ↓
+Banco de Dados
+```
+
+---
+
+# Função de Cada Camada
+
+## Controller
+
+Recebe requisições HTTP.
+
+Exemplo:
+
+```http
 GET /user
-POST /user
-PATCH /user/{id}
-DELETE /user/{id}
-Com Swagger, você consegue testar a API direto pelo navegador, sem precisar obrigatoriamente usar Postman ou Thunder Client.
-Resumo para prova
-NestJS = framework backend para Node.js com TypeScript.
+```
 
-Module = organiza uma parte do sistema.
+---
 
-Controller = recebe as requisições HTTP.
+## DTO
 
-Service = contém a regra de negócio.
+Valida os dados recebidos.
 
-DTO = define e valida os dados recebidos.
-
-Entity/Model = representa a tabela do banco.
-
-Sequelize = ORM usado para conversar com o banco.
-
-MySQL = banco de dados relacional.
-
-JWT = autenticação por token.
-
-Swagger = documentação e teste da API.
-
-Microsserviços = divisão do sistema em serviços menores.
-Fluxo mental do NestJS
-Requisição chega na API
-       ↓
-Controller recebe
-       ↓
-DTO valida os dados
-       ↓
-Service processa a regra
-       ↓
-Model/Sequelize acessa o banco
-       ↓
-Resposta volta para o usuário
 Exemplo:
-POST /user
-       ↓
-UserController
-       ↓
-CreateUserDto
-       ↓
-UserService
-       ↓
-UserModel
-       ↓
-MySQL
 
+```ts
+nome: string
+email: string
+```
+
+---
+
+## Service
+
+Contém a lógica de negócio.
+
+Exemplo:
+
+```ts
+Cadastrar usuário
+Atualizar usuário
+Remover usuário
+```
+
+---
+
+## Model (Entity)
+
+Representa a tabela do banco.
+
+Exemplo:
+
+```txt
+Tabela User
+```
+
+---
+
+## Banco de Dados
+
+Armazena as informações permanentemente.
+
+Exemplo:
+
+```txt
+MySQL
+PostgreSQL
+MongoDB
+```
+
+---
+
+# Resumo para a Prova
+
+| Conceito       | Função                  |
+| -------------- | ----------------------- |
+| NestJS         | Framework Backend       |
+| Module         | Organização do sistema  |
+| Controller     | Recebe requisições      |
+| Service        | Regras de negócio       |
+| DTO            | Validação de dados      |
+| Model/Entity   | Representação da tabela |
+| Sequelize      | ORM                     |
+| MySQL          | Banco de dados          |
+| JWT            | Autenticação            |
+| Swagger        | Documentação            |
+| Microsserviços | Divisão do sistema      |
+
+---
+
+# Fluxo Completo de uma Requisição
+
+```txt
+POST /user
+        ↓
+UserController
+        ↓
+CreateUserDto
+        ↓
+UserService
+        ↓
+UserModel
+        ↓
+MySQL
+        ↓
+Resposta ao Cliente
+```
+
+Este é o fluxo mais importante para compreender o funcionamento do NestJS e frequentemente aparece em provas e entrevistas.
